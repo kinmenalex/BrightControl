@@ -66,6 +66,7 @@ public:
 	afx_msg void OnBnClickedButtonBri4();
 	afx_msg void OnBnClickedButtonBri5();
 	afx_msg void OnBnClickedButtonBri6();
+	CButton btnBri0;
 	CButton btnBri1;
 	CButton btnBri2;
 	CButton btnBri3;

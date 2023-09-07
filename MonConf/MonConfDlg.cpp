@@ -17,7 +17,7 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 #define Product_str "BrightControl"
-#define Version_str "0.36"
+#define Version_str "0.38"
 const char * BrightControlTitle_str = Product_str " " Version_str;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -98,6 +98,7 @@ void CMonConfDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_EDIT_CONTRAST, edContrast);
 	DDX_Control(pDX, IDC_EDIT_BRIGHTNESS, edBrightness);
 	//}}AFX_DATA_MAP
+	DDX_Control(pDX, IDC_BUTTON_BRI0, btnBri0);
 	DDX_Control(pDX, IDC_BUTTON_BRI1, btnBri1);
 	DDX_Control(pDX, IDC_BUTTON_BRI2, btnBri2);
 	DDX_Control(pDX, IDC_BUTTON_BRI3, btnBri3);
@@ -195,20 +196,21 @@ BOOL CMonConfDlg::OnInitDialog()
 
 	LPTSTR p, nextStr;
 	p = GetCommandLine();
-	int i,n;
+	int i, n, nBri;
 
 	copyQuotStr(path,p,TEXT(' '), &nextStr);
 
 	p = nextStr;
 
 	cmdBri[0] = -1;
-	cmdBri[1] = 10;
+	cmdBri[1] = 15;
 	cmdBri[2] = 20;
-	cmdBri[3] = 50;
-	cmdBri[4] = 60;
-	cmdBri[5] = 80;
-	cmdBri[6] = 90;
+	cmdBri[3] = 30;
+	cmdBri[4] = 40;
+	cmdBri[5] = 50;
+	cmdBri[6] = 80;
 
+	nBri = 0;
 	while(*p) {
 		while(*p && *p != TEXT('/') ) p++;
 
@@ -220,44 +222,22 @@ BOOL CMonConfDlg::OnInitDialog()
 			while(*p && *p != TEXT('=') ) p++;
 
 			n = atoi(p+1);
-			if( i>= 0 && i <= MAXBRI)
+			if( i>= 0 && i <= MAXBRI) {
 				cmdBri[i] = n;
+				nBri++;
+			}
 			p+=2;
 		}
 		p++;
 	}
 
-CString str;
-	str.Format(_T("%d%%"), cmdBri[1]);   
-	btnBri1.SetWindowText(str);
-	str.Format(_T("%d%%"), cmdBri[2]);   
-	btnBri2.SetWindowText(str);
-	str.Format(_T("%d%%"), cmdBri[3]);   
-	btnBri3.SetWindowText(str);
-	str.Format(_T("%d%%"), cmdBri[4]);   
-	btnBri4.SetWindowText(str);
-	str.Format(_T("%d%%"), cmdBri[5]);   
-	btnBri5.SetWindowText(str);
-	str.Format(_T("%d%%"), cmdBri[6]);   
-	btnBri6.SetWindowText(str);
-
-
-	dbg_printf(_T("用使方法：\r\r\n"));
-
-	dbg_printf(_T("1. 設定常用亮度：建立捷徑後加上參數 /b1=%d /b2=%d /b3=%d /b4=%d /b5=%d /b6=%d\r\r\n"),
-		cmdBri[1],cmdBri[2],cmdBri[3],cmdBri[3],cmdBri[5],cmdBri[6]);
-	dbg_printf(_T("2. 直接設定亮度後離開：建立捷徑後加上參數 /b0=亮度\r\r\nEx: BrightControl.exe /b0=50\r\r\n"));
-	dbg_printf(_T("\r\r\n")); 
-
-
-	if( cmdBri[0] != -1 )
+	if( cmdBri[0] != -1 && nBri == 1)
 	{
 		SetMonitorBright(this->m_hWnd,cmdBri[0]);
 		OnOK();			// return 
 	}
 	else {
 		// Restoring the window placement
-
 		WINDOWPLACEMENT *lwp;
 		UINT nl;
 
@@ -267,6 +247,29 @@ CString str;
 			delete [] lwp;
 		}
 		//
+		if (cmdBri[0] < 0) { cmdBri[0] = 0; }
+		CString str;
+		str.Format(_T("%d%%"), cmdBri[0]);
+		btnBri0.SetWindowText(str);
+		str.Format(_T("%d%%"), cmdBri[1]);
+		btnBri1.SetWindowText(str);
+		str.Format(_T("%d%%"), cmdBri[2]);
+		btnBri2.SetWindowText(str);
+		str.Format(_T("%d%%"), cmdBri[3]);
+		btnBri3.SetWindowText(str);
+		str.Format(_T("%d%%"), cmdBri[4]);
+		btnBri4.SetWindowText(str);
+		str.Format(_T("%d%%"), cmdBri[5]);
+		btnBri5.SetWindowText(str);
+		str.Format(_T("%d%%"), cmdBri[6]);
+		btnBri6.SetWindowText(str);
+
+		dbg_printf(_T("用使方法：\r\r\n"));
+
+		dbg_printf(_T("1. 設定常用亮度：建立捷徑後加上參數\r\r\n"));
+		dbg_printf(_T("Ex: BrightControl.exe /b0=%d /b1=%d /b2=%d /b3=%d /b4=%d /b5=%d /b6=%d\r\r\n"),
+				   cmdBri[0], cmdBri[1], cmdBri[2], cmdBri[3], cmdBri[3], cmdBri[5], cmdBri[6]);
+		dbg_printf(_T("2. 直接設定亮度後離開：建立捷徑後加上參數 /b0=亮度\r\r\nEx: BrightControl.exe /b0=50\r\r\n"));
 
 		OnButtonGet();
 	}
@@ -612,7 +615,7 @@ int CMonConfDlg::QuickSetBright(int cBright)
 
 void CMonConfDlg::OnBnClickedButtonBri0()
 {
-	QuickSetBright(0);
+	QuickSetBright(cmdBri[0]);
 }
 
 void CMonConfDlg::OnBnClickedButtonBri1()
